@@ -1,31 +1,51 @@
 #include <QApplication>
+#include <QWidget>
 #include <QSlider>
 #include <QVBoxLayout>
 #include <QPixmap>
 #include <QPainter>
 #include <QPaintEvent>
 
+enum COLOR {
+    GREEN,
+    YELLOW,
+    RED
+};
+
 class MainWindow : public QWidget {
 public:
-    MainWindow() {
-        this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        this->resize(200, 200);
-        this->move(800, 400);
+    MainWindow() { move(800, 400);}
+};
+
+class Circle : public QWidget {
+public:
+    Circle() {
+        setFixedSize(200, 200);
+        currentMap = QPixmap("green.png");
+        update();
     }
 
-public slots:
-    void reDraw(QPixmap& map) {
-        currentMap = map;
+    void rePaint(int color) {
+        currentMap = (color == GREEN) ? QPixmap("green.png") :
+                     (color == YELLOW) ? QPixmap("yellow.png") : QPixmap("red.png");
         update();
     }
 
     void paintEvent(QPaintEvent* e) override {
-        QPainter p(this);
-        p.drawPixmap(e->rect(), currentMap);
+        QPainter painter(this);
+        painter.drawPixmap(e->rect(), currentMap);
     }
 
 private:
     QPixmap currentMap;
+};
+
+class Slider : public QSlider {
+public:
+    Slider() {
+        setMinimum(0);
+        setMaximum(100);
+    }
 };
 
 int main(int argc, char *argv[])
@@ -34,18 +54,17 @@ int main(int argc, char *argv[])
 
     auto* mainWindow = new MainWindow;
 
-    auto* slider = new QSlider(Qt::Horizontal, mainWindow);
-    slider->setMinimum(0);
-    slider->setMaximum(100);
+    auto* circle = new Circle;
+
+    auto* slider = new QSlider(Qt::Horizontal);
     
     auto* layout = new QVBoxLayout(mainWindow);
+    layout->addWidget(circle);
     layout->addWidget(slider);
 
     QObject::connect(slider, &QSlider::valueChanged, [&](int newValue) {
-        QPixmap map = (newValue > 0 && newValue < 34) ? QPixmap("green.png")
-            : (newValue > 33 && newValue < 67) ? QPixmap("yellow.png") : QPixmap("red.png");
-        slider->update();
-        mainWindow->reDraw(map);
+        (newValue < 34) ? circle->rePaint(GREEN) :
+        (newValue > 33 && newValue < 67) ? circle->rePaint(YELLOW) : circle->rePaint(RED);
         });
  
     mainWindow->show();
