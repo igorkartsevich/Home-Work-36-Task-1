@@ -25,9 +25,21 @@ public:
         update();
     }
 
-    void rePaint(int color) {
-        currentMap = (color == GREEN) ? QPixmap("green.png") :
-                     (color == YELLOW) ? QPixmap("yellow.png") : QPixmap("red.png");
+    void rePaint(COLOR color) {
+        switch (color) {
+        case GREEN:
+            currentMap = QPixmap("green.png");
+            break;
+        case YELLOW:
+            currentMap = QPixmap("yellow.png");
+            break;
+        case RED:
+            currentMap = QPixmap("red.png");
+            break;
+        default:
+            break;
+        }
+
         update();
     }
 
